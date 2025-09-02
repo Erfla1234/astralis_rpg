@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import '../models/npc.dart';
 import '../models/astral.dart';
 import '../systems/game_state.dart';
+import 'npc_component.dart';
+import 'astral_component.dart';
 
 class WorldMap extends Component {
   late GameState _gameState;
@@ -99,6 +101,10 @@ class WorldMap extends Component {
     npcs.add(elderKaelen);
     _gameState.npcs.add(elderKaelen);
     
+    // Add visual NPC component
+    final elderKaelenComponent = NPCComponent(npc: elderKaelen);
+    await add(elderKaelenComponent);
+    
     // Seraya - Rival Shaman
     final seraya = NPC(
       id: 'seraya',
@@ -126,6 +132,10 @@ class WorldMap extends Component {
     npcs.add(seraya);
     _gameState.npcs.add(seraya);
     
+    // Add visual NPC component
+    final serayaComponent = NPCComponent(npc: seraya);
+    await add(serayaComponent);
+    
     // Torren Duskbane - Relic Keeper
     final torren = NPC(
       id: 'torren_duskbane',
@@ -152,6 +162,10 @@ class WorldMap extends Component {
     );
     npcs.add(torren);
     _gameState.npcs.add(torren);
+    
+    // Add visual NPC component  
+    final torrenComponent = NPCComponent(npc: torren);
+    await add(torrenComponent);
   }
   
   Future<void> _populateWithAstrals() async {
@@ -171,6 +185,10 @@ class WorldMap extends Component {
     astrals.add(tuki);
     _gameState.discoveredAstrals.add(tuki);
     
+    // Add visual Astral component
+    final tukiComponent = AstralComponent(astral: tuki);
+    await add(tukiComponent);
+    
     // Cindcub - Ember Astral (Grove Eternal region)
     final cindcub = Astral(
       id: 'cindcub',
@@ -186,6 +204,10 @@ class WorldMap extends Component {
     
     astrals.add(cindcub);
     _gameState.discoveredAstrals.add(cindcub);
+    
+    // Add visual Astral component
+    final cindcubComponent = AstralComponent(astral: cindcub);
+    await add(cindcubComponent);
     
     // Rylotl - Blood Astral (regeneration focus)
     final rylotl = Astral(
@@ -203,6 +225,10 @@ class WorldMap extends Component {
     astrals.add(rylotl);
     _gameState.discoveredAstrals.add(rylotl);
     
+    // Add visual Astral component
+    final rylotlComponent = AstralComponent(astral: rylotl);
+    await add(rylotlComponent);
+    
     // SYN Phantom - Corrupted synthetic Astral
     final synPhantom = Astral(
       id: 'syn_phantom',
@@ -219,6 +245,10 @@ class WorldMap extends Component {
     
     astrals.add(synPhantom);
     _gameState.discoveredAstrals.add(synPhantom);
+    
+    // Add visual Astral component
+    final synPhantomComponent = AstralComponent(astral: synPhantom);
+    await add(synPhantomComponent);
   }
   
   Future<void> _createInteractables() async {

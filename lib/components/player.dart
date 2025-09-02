@@ -1,6 +1,7 @@
 import 'package:flame/components.dart';
 import 'package:flame/collisions.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/material.dart';
 import '../systems/game_state.dart';
 
 class Player extends SpriteAnimationComponent with CollisionCallbacks {
@@ -26,8 +27,11 @@ class Player extends SpriteAnimationComponent with CollisionCallbacks {
   }
   
   Future<void> _loadAnimations() async {
-    // For now, create a simple colored rectangle as placeholder
-    // TODO: Load actual sprite animations when assets are available
+    // Create a simple colored rectangle as player representation
+    add(RectangleComponent(
+      size: Vector2(32, 32),
+      paint: Paint()..color = const Color(0xFF00FF00), // Bright green for visibility
+    ));
   }
   
   void updateMovement(Set<LogicalKeyboardKey> keysPressed) {
