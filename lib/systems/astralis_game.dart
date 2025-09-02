@@ -6,12 +6,14 @@ import '../components/player.dart';
 import '../components/world_map.dart';
 import '../components/npc_component.dart';
 import '../components/astral_component.dart';
+import '../components/ui/dialogue_overlay.dart';
 import '../systems/game_state.dart';
 
 class AstralisGame extends FlameGame with TapDetector, KeyboardHandler, HasCollisionDetection {
   late Player player;
   late WorldMap worldMap;
   late GameState gameState;
+  DialogueOverlay? currentDialogue;
   
   @override
   Future<void> onLoad() async {
@@ -42,12 +44,19 @@ class AstralisGame extends FlameGame with TapDetector, KeyboardHandler, HasColli
   void onTapDown(TapDownInfo info) {
     final tapPosition = info.eventPosition.global;
     
+    // If dialogue is showing, close it on tap
+    if (currentDialogue != null) {
+      remove(currentDialogue!);
+      currentDialogue = null;
+      return;
+    }
+    
     // Check for NPC interactions first
     for (final component in children) {
       if (component is NPCComponent) {
         final distance = component.position.distanceTo(tapPosition);
         if (distance < 60) { // Interaction range
-          _showDialogue(component.interact());
+          _showDialogue(component.interact(), component.npc.name);
           return;
         }
       }
@@ -65,18 +74,36 @@ class AstralisGame extends FlameGame with TapDetector, KeyboardHandler, HasColli
     player.handleInteraction(tapPosition);
   }
   
-  void _showDialogue(String message) {
-    // For now, just print to console - later we'll add proper UI
-    print('NPC says: $message');
+  void _showDialogue(String message, String speakerName) {
+    // Remove any existing dialogue
+    if (currentDialogue != null) {
+      remove(currentDialogue!);
+    }
     
-    // TODO: Show actual dialogue UI overlay
+    // Create new dialogue overlay
+    currentDialogue = DialogueOverlay(
+      message: message,
+      speakerName: speakerName,
+      gameSize: size,
+    );
+    
+    add(currentDialogue!);
+    print('$speakerName says: $message');
   }
   
   void _showAstralInteraction(AstralComponent astralComponent) {
-    print('Encountered ${astralComponent.astral.name}!');
-    print('Trust Level: ${astralComponent.astral.trustLevel}');
+    final astral = astralComponent.astral;
+    String message = astral.getInteractionResponse('approach');
     
-    // TODO: Show bonding interface
+    if (astral.isBonded) {
+      message = '${astral.name} is your loyal companion. Trust: ${astral.trustLevel.toInt()}%';
+    } else if (astral.canBond()) {
+      message = '${astral.name} trusts you deeply! You could form a bond. Trust: ${astral.trustLevel.toInt()}%';
+    } else {
+      message = '${astral.name} ${astral.getInteractionResponse('approach')} Trust: ${astral.trustLevel.toInt()}%';
+    }
+    
+    _showDialogue(message, astral.name);
   }
   
   @override
