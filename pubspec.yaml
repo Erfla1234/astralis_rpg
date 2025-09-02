@@ -1,5 +1,5 @@
 name: astralis_rpg
-description: "A new Flutter project."
+description: "A modernized Monster Tamer RPG featuring trust-based bonding and exploration."
 publish_to: 'none'
 version: 0.1.0
 
@@ -9,6 +9,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flame: ^1.20.0
+  flame_audio: ^2.1.7
+  flame_tiled: ^1.21.0
+  vector_math: ^2.1.4
 
 dev_dependencies:
   flutter_test:
@@ -17,3 +21,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/audio/
+    - assets/maps/
+    - assets/data/

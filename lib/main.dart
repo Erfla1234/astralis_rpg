@@ -1,20 +1,31 @@
+import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'screens/game_screen.dart';
 
 void main() {
-  runApp(const MainApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+  ]);
+  
+  runApp(const AstralisApp());
 }
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+class AstralisApp extends StatelessWidget {
+  const AstralisApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
-        ),
+    return MaterialApp(
+      title: 'Astralis Monster Tamer',
+      theme: ThemeData(
+        primarySwatch: Colors.purple,
+        fontFamily: 'Orbitron',
       ),
+      home: const GameScreen(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
