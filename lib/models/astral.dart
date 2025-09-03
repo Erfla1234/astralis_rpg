@@ -101,11 +101,11 @@ class Astral {
       case 'approach':
         return "$name looks at you with kind eyes, sensing your peaceful intentions.";
       case 'offer_food':
-        return "$name gracefully accepts your offering, its trust in you growing.";
+        return "$name gracefully accepts your offering, your bond growing stronger.";
       case 'harsh':
         return "$name recoils, its gentle nature hurt by your aggressive approach.";
       default:
-        return "$name emanates a calming presence.";
+        return "$name emanates a calming presence. The Cycle flows peacefully around this Astra.";
     }
   }
   

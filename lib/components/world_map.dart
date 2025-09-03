@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../models/npc.dart';
 import '../models/astral.dart';
 import '../systems/game_state.dart';
+import '../data/temple_data.dart';
 import 'npc_component.dart';
 import 'astral_component.dart';
 
@@ -59,25 +60,25 @@ class WorldMap extends Component {
   }
   
   Future<void> _populateWithNPCs() async {
-    // Elder Kaelen - Dream Shaman mentor
+    // Elder Kaelen - Grove Mentor/Guide
     final elderKaelen = NPC(
       id: 'elder_kaelen',
       name: 'Elder Kaelen',
       role: NPCRole.elder,
-      description: 'A blind seer draped in starlight robes, eyes glowing faintly as if holding galaxies. His connection to Dream Astrals lets him glimpse possible futures.',
-      position: Vector2(1020, 220),
+      description: 'Grove mentor and guide who understands The Cycle. His connection to Dream Astrals lets him glimpse possible futures.',
+      position: Vector2(200, 200), // Grove region (left side)
       dialogueTrees: {
         'default': DialogueTree(
           greeting: 'The Hollow whispers louder each cycle… but you, child, carry a voice strong enough to answer.',
           options: [
             DialogueOption(
               text: 'What is the Hollow you speak of?',
-              response: 'Long ago, Hollow Essence nearly consumed all life. It stirs again, drawn to the breaking of our sacred cycle. SYN forges Synthetic Astrals, denying them rebirth.',
+              response: 'Long ago, Hollow Essence nearly consumed all life. It stirs again, drawn to the breaking of The Cycle. SYN forges Synthetics, binding Astral essence to machines.',
               consequences: {'setFlag': {'flag': 'knows_hollow_threat', 'value': true}},
             ),
             DialogueOption(
               text: 'Teach me about true bonding.',
-              response: 'Bonding is not capture, young shaman. It is trust freely given. Show understanding, demonstrate care, and the Astrals will choose to walk beside you.',
+              response: 'Relics awaken the connection between human and Astra. Show Care, let trust grow, and they will choose to Bond with you. Starlight remembers all genuine bonds.',
             ),
             DialogueOption(
               text: 'The dreams show me darkness...',
@@ -166,6 +167,40 @@ class WorldMap extends Component {
     // Add visual NPC component  
     final torrenComponent = NPCComponent(npc: torren);
     await add(torrenComponent);
+    
+    // Add Temple Stewards based on canonical data
+    for (final temple in TempleData.getAllTemples()) {
+      final steward = TempleData.createTempleSteward(temple);
+      npcs.add(steward);
+      _gameState.npcs.add(steward);
+      
+      // Add visual temple steward component
+      final stewardComponent = NPCComponent(npc: steward);
+      await add(stewardComponent);
+      
+      // Add temple structure
+      final templeStructure = RectangleComponent(
+        position: Vector2(temple.position.x - 10, temple.position.y - 10),
+        size: Vector2(60, 50),
+        paint: Paint()..color = temple.templeColor.withOpacity(0.7),
+      );
+      await add(templeStructure);
+      
+      // Add temple marker with philosophy
+      final templeLabel = TextComponent(
+        text: temple.name,
+        textRenderer: TextPaint(
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        position: Vector2(temple.position.x, temple.position.y - 25),
+        anchor: Anchor.center,
+      );
+      await add(templeLabel);
+    }
   }
   
   Future<void> _populateWithAstrals() async {

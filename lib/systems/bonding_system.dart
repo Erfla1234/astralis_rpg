@@ -252,11 +252,11 @@ class BondingSystem {
   static String getActionDescription(BondingAction action) {
     switch (action) {
       case BondingAction.showCare:
-        return 'Pet and show gentle affection';
+        return 'Show Care'; // Official terminology
       case BondingAction.battleBond:
-        return 'Challenge to a friendly battle';
+        return 'Battle Bond'; // Official terminology
       case BondingAction.relicEnergy:
-        return 'Channel relic energy for instant bond';
+        return 'Relic Energy'; // Official terminology
       case BondingAction.offer_food:
         return 'Offer food or treats';
       case BondingAction.play:
