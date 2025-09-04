@@ -12,7 +12,15 @@ dependencies:
   flame: ^1.20.0
   flame_audio: ^2.1.7
   flame_tiled: ^1.21.0
+  flame_forge2d: ^0.18.3
+  tiled: ^0.10.2
   vector_math: ^2.1.4
+  web_socket_channel: ^3.0.1
+  json_annotation: ^4.9.0
+  shared_preferences: ^2.3.3
+  path_provider: ^2.1.5
+  http: ^1.2.2
+  uuid: ^4.5.1
 
 dev_dependencies:
   flutter_test:
