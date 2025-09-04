@@ -1,4 +1,5 @@
 import 'package:flame/components.dart';
+import 'package:flame/particles.dart';
 import 'package:flame_tiled/flame_tiled.dart';
 import 'package:tiled/tiled.dart';
 import 'package:flutter/material.dart';

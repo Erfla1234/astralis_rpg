@@ -50,7 +50,7 @@ class AstralisApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const SplashScreen(),
+      home: const MainMenuScreen(), // Skip intro for now
       debugShowCheckedModeBanner: false,
     );
   }

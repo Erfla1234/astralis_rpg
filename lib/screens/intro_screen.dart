@@ -250,8 +250,9 @@ class IntroScreen extends FlameGame {
             1.0,
             EffectController(duration: 0.5),
           ),
-          CallbackEffect(
-            _loadMainGame,
+          OpacityEffect.to(
+            0,
+            EffectController(duration: 0.5),
           ),
         ]),
       ),
