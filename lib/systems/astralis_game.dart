@@ -12,6 +12,8 @@ import '../components/npc_component.dart';
 import '../components/astral_component.dart';
 import '../components/ui/dialogue_overlay.dart';
 import '../systems/game_state.dart';
+import '../systems/tiled_world_manager.dart';
+import '../ui/map_travel_overlay.dart';
 // import '../effects/particle_effects.dart'; // Commented out due to compatibility issues
 
 class AstralisGame extends FlameGame with TapDetector, KeyboardHandler, HasCollisionDetection {
@@ -19,11 +21,13 @@ class AstralisGame extends FlameGame with TapDetector, KeyboardHandler, HasColli
   late WorldMap worldMap;
   late GameState gameState;
   DialogueOverlay? currentDialogue;
+  MapTravelOverlay? currentTravelOverlay;
   
   // Production-quality visual effects
   final List<ParticleSystemComponent> ambientEffects = [];
   double ambientTimer = 0;
   late CameraComponent gameCamera;
+  late TiledWorldManager tiledWorldManager;
   
   @override
   Color backgroundColor() => const Color(0xFF0A0E27);
@@ -41,13 +45,24 @@ class AstralisGame extends FlameGame with TapDetector, KeyboardHandler, HasColli
     );
     await add(gameCamera);
     
+    // Initialize Tiled World Manager
+    tiledWorldManager = TiledWorldManager();
+    await add(tiledWorldManager);
+    
     // Create enhanced visual background
     await _createEnhancedBackground();
     
-    worldMap = WorldMap();
-    await gameCamera.viewport.add(worldMap);
+    // Load starting storyline map
+    final mapLoaded = await tiledWorldManager.loadStorylineMap('grove_of_beginnings');
+    if (!mapLoaded) {
+      // Fallback to original world map
+      worldMap = WorldMap();
+      await gameCamera.viewport.add(worldMap);
+    }
     
-    player = Player(position: Vector2(400, 300));
+    // Create player at appropriate spawn position
+    final spawnPos = tiledWorldManager.getSpawnPosition();
+    player = Player(position: spawnPos);
     await gameCamera.viewport.add(player);
     
     // Set smooth camera following
@@ -221,15 +236,7 @@ class AstralisGame extends FlameGame with TapDetector, KeyboardHandler, HasColli
     ambientEffects.add(windParticles);
   }
 
-  @override
-  bool onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
-    if (event is KeyDownEvent || event is KeyRepeatEvent) {
-      player.updateMovement(keysPressed);
-    } else if (event is KeyUpEvent) {
-      player.updateMovement(keysPressed);
-    }
-    return true;
-  }
+  // Keyboard handling moved to end of file
 
   @override
   void onTapDown(TapDownInfo info) {
@@ -376,5 +383,116 @@ class AstralisGame extends FlameGame with TapDetector, KeyboardHandler, HasColli
     
     gameCamera.viewport.add(dust);
     ambientEffects.add(dust);
+  }
+  
+  void _openTravelMap() {
+    if (currentTravelOverlay != null || currentDialogue != null) return;
+    
+    currentTravelOverlay = MapTravelOverlay(
+      worldManager: tiledWorldManager,
+      onMapSelected: _travelToMap,
+      onClose: () {
+        currentTravelOverlay = null;
+      },
+    );
+    
+    add(currentTravelOverlay!);
+  }
+  
+  Future<void> _travelToMap(String mapName) async {
+    // Add travel transition effect
+    final transition = RectangleComponent(
+      size: Vector2(800, 600),
+      paint: Paint()..color = Colors.black.withOpacity(0),
+      priority: 500,
+    );
+    
+    add(transition);
+    
+    transition.add(
+      OpacityEffect.to(
+        1.0,
+        EffectController(duration: 0.5),
+        onComplete: () async {
+          // Load new map
+          final success = await tiledWorldManager.loadStorylineMap(mapName);
+          
+          if (success) {
+            // Update player position to new spawn point
+            player.position = tiledWorldManager.getSpawnPosition();
+            
+            // Add arrival effect
+            _addTravelArrivalEffect();
+            
+            print('Traveled to: $mapName');
+          }
+          
+          // Fade back in
+          transition.add(
+            OpacityEffect.to(
+              0.0,
+              EffectController(duration: 0.5),
+              onComplete: () => transition.removeFromParent(),
+            ),
+          );
+        },
+      ),
+    );
+  }
+  
+  void _addTravelArrivalEffect() {
+    final arrivalEffect = ParticleSystemComponent(
+      position: player.position,
+      particle: Particle.generate(
+        count: 20,
+        lifespan: 2,
+        generator: (i) => AcceleratedParticle(
+          acceleration: Vector2(0, -30),
+          speed: Vector2(
+            math.Random().nextDouble() * 100 - 50,
+            -math.Random().nextDouble() * 50 - 25,
+          ),
+          position: Vector2.zero(),
+          child: CircleParticle(
+            radius: 3,
+            paint: Paint()
+              ..color = const Color(0xFFFFD700).withOpacity(0.8)
+              ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
+          ),
+        ),
+      ),
+    );
+    
+    gameCamera.viewport.add(arrivalEffect);
+    ambientEffects.add(arrivalEffect);
+  }
+  
+  @override
+  bool onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
+    if (event is KeyDownEvent) {
+      if (event.logicalKey == LogicalKeyboardKey.escape) {
+        if (currentTravelOverlay != null) {
+          return false; // Let overlay handle it
+        } else if (currentDialogue != null) {
+          remove(currentDialogue!);
+          currentDialogue = null;
+          return true;
+        }
+      }
+      
+      if (event.logicalKey == LogicalKeyboardKey.keyM) {
+        _openTravelMap();
+        return true;
+      }
+    }
+    
+    // Handle player movement
+    if (event is KeyDownEvent || event is KeyRepeatEvent) {
+      player.updateMovement(keysPressed);
+    } else if (event is KeyUpEvent) {
+      player.updateMovement(keysPressed);
+    }
+    
+    return true;
   }
 }

@@ -545,13 +545,9 @@ class StorylinePlaceholderMap extends TiledComponent {
   final StorylineMapData mapData;
   
   StorylinePlaceholderMap({required this.mapData})
-      : super.fromTiledMap(
-          // Create minimal Tiled map structure for compatibility
-          TiledMap(
-            map: Map(),
-            tileMap: {},
-          ),
-          Vector2.all(16),
+      : super(
+          // Create as basic TiledComponent for compatibility
+          size: Vector2(800, 600),
         );
   
   @override
