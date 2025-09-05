@@ -1,0 +1,46 @@
+{
+  "grass_fill": [1, 8, 15, 21, 32, 38, 48],
+  "path": {
+    "straight_h": [2],
+    "straight_v": [3],
+    "corner_ne": [5],
+    "corner_nw": [4],
+    "corner_se": [7],
+    "corner_sw": [6],
+    "tee_n": [11],
+    "tee_e": [13],
+    "tee_s": [12],
+    "tee_w": [14],
+    "cross": [10],
+    "end_n": [3],
+    "end_e": [2],
+    "end_s": [3],
+    "end_w": [2]
+  },
+  "water": {
+    "straight_h": [26, 27],
+    "straight_v": [23, 31],
+    "corner_ne": [29],
+    "corner_nw": [28],
+    "corner_se": [31],
+    "corner_sw": [30],
+    "end_n": [23],
+    "end_e": [26],
+    "end_s": [31],
+    "end_w": [27],
+    "fill": [22, 39, 40]
+  },
+  "decor": {
+    "tree": [9, 17],
+    "stump": [34],
+    "rock": [18, 19, 20],
+    "flower": [8, 16, 37],
+    "log": [33],
+    "bush": [25, 36],
+    "crate": [41],
+    "sign": [42],
+    "fence": [43, 44, 45],
+    "barrel": [46],
+    "chest": [47]
+  }
+}
