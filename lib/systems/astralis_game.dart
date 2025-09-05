@@ -5,6 +5,7 @@ import 'package:flame/effects.dart';
 import 'package:flame/particles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'dart:math' as math;
 import '../components/player.dart';
 import '../components/world_map.dart';
@@ -28,6 +29,12 @@ class AstralisGame extends FlameGame with TapDetector, KeyboardHandler, HasColli
   double ambientTimer = 0;
   late CameraComponent gameCamera;
   late TiledWorldManager tiledWorldManager;
+  
+  // Audio system
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  final AudioPlayer _sfxPlayer = AudioPlayer();
+  String currentMusic = '';
+  bool soundEnabled = true;
   
   @override
   Color backgroundColor() => const Color(0xFF0A0E27);
@@ -154,6 +161,9 @@ class AstralisGame extends FlameGame with TapDetector, KeyboardHandler, HasColli
       repeat: true,
       onTick: _addWindEffects,
     ));
+    
+    // Start ambient music
+    playMusic('world_theme.mp3');
   }
   
   void _addMysticalParticles() {
@@ -254,6 +264,7 @@ class AstralisGame extends FlameGame with TapDetector, KeyboardHandler, HasColli
       if (component is NPCComponent) {
         final distance = component.position.distanceTo(tapPosition);
         if (distance < 60) { // Interaction range
+          playSound('dialogue.wav');
           _showDialogue(component.interact(), component.npc.name);
           return;
         }
@@ -293,15 +304,18 @@ class AstralisGame extends FlameGame with TapDetector, KeyboardHandler, HasColli
     final astral = astralComponent.astral;
     String message = astral.getInteractionResponse('approach');
     
-    // Add visual bonding effect
+    // Add visual bonding effect and sound
     if (!astral.isBonded && astral.canBond()) {
       _addBondingEffect(astralComponent.position);
+      playSound('bond_success.wav');
       message = '${astral.name} trusts you deeply! A bond could be formed. Trust: ${astral.trustLevel.toInt()}%';
     } else if (astral.isBonded) {
       _addCompanionEffect(astralComponent.position);
+      playSound('companion_greet.wav');
       message = '${astral.name} is your loyal companion. Trust: ${astral.trustLevel.toInt()}%';
     } else {
       _addInteractionSparkles(astralComponent.position);
+      playSound('astral_approach.wav');
       message = '${astral.name} ${astral.getInteractionResponse('approach')} Trust: ${astral.trustLevel.toInt()}%';
     }
     
@@ -467,6 +481,48 @@ class AstralisGame extends FlameGame with TapDetector, KeyboardHandler, HasColli
     ambientEffects.add(arrivalEffect);
   }
   
+  // Audio System Methods
+  Future<void> playMusic(String musicPath) async {
+    if (!soundEnabled || currentMusic == musicPath) return;
+    
+    try {
+      await _audioPlayer.stop();
+      await _audioPlayer.play(AssetSource('audio/music/$musicPath'));
+      await _audioPlayer.setReleaseMode(ReleaseMode.loop);
+      await _audioPlayer.setVolume(0.6);
+      currentMusic = musicPath;
+      print('🎵 Playing music: $musicPath');
+    } catch (e) {
+      print('⚠️ Could not play music: $musicPath - $e');
+      // Fallback: continue without audio
+    }
+  }
+  
+  Future<void> playSound(String soundPath) async {
+    if (!soundEnabled) return;
+    
+    try {
+      await _sfxPlayer.play(AssetSource('audio/sfx/$soundPath'));
+      await _sfxPlayer.setVolume(0.8);
+    } catch (e) {
+      print('⚠️ Could not play sound: $soundPath - $e');
+      // Fallback: continue without audio
+    }
+  }
+  
+  void toggleSound() {
+    soundEnabled = !soundEnabled;
+    if (!soundEnabled) {
+      _audioPlayer.stop();
+      _sfxPlayer.stop();
+    }
+  }
+  
+  Future<void> stopMusic() async {
+    await _audioPlayer.stop();
+    currentMusic = '';
+  }
+  
   @override
   bool onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
     if (event is KeyDownEvent) {
@@ -481,7 +537,13 @@ class AstralisGame extends FlameGame with TapDetector, KeyboardHandler, HasColli
       }
       
       if (event.logicalKey == LogicalKeyboardKey.keyM) {
+        playSound('menu_open.wav');
         _openTravelMap();
+        return true;
+      }
+      
+      if (event.logicalKey == LogicalKeyboardKey.keyS) {
+        toggleSound();
         return true;
       }
     }
@@ -494,5 +556,12 @@ class AstralisGame extends FlameGame with TapDetector, KeyboardHandler, HasColli
     }
     
     return true;
+  }
+  
+  @override
+  void onRemove() {
+    _audioPlayer.dispose();
+    _sfxPlayer.dispose();
+    super.onRemove();
   }
 }

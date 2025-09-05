@@ -234,8 +234,9 @@ class TiledWorldManager extends Component {
           print('Loaded Tiled map: ${mapData.config.path}');
         } catch (e) {
           print('Failed to load Tiled map: ${mapData.config.path}');
-          print('Creating procedural placeholder for: ${mapData.config.displayName}');
-          currentMap = _createStorylinePlaceholder(mapData);
+          print('Using master world map instead of ${mapData.config.displayName}');
+          // Load the master world map as fallback
+          currentMap = await TiledComponent.load('maps/storyline/astralis_master_world.tmx', Vector2.all(16));
           _loadedMaps[mapName] = currentMap!;
         }
       }
@@ -259,10 +260,10 @@ class TiledWorldManager extends Component {
     }
   }
   
-  /// Create a beautiful procedural placeholder when .tmx files aren't available
-  TiledComponent _createStorylinePlaceholder(StorylineMapData mapData) {
-    final placeholder = StorylinePlaceholderMap(mapData: mapData);
-    return placeholder;
+  /// Create a basic placeholder when .tmx files aren't available
+  TiledComponent? _createStorylinePlaceholder(StorylineMapData mapData) {
+    print('⚠️ TMX file not found for ${mapData.config.displayName}');
+    return null; // Return null for now - will use master world map instead
   }
   
   void _setupStorylineElements(StorylineMapData mapData, Vector2? customSpawn) {
@@ -541,14 +542,10 @@ class StorylineProgress {
 }
 
 // Placeholder map when .tmx files aren't available
-class StorylinePlaceholderMap extends TiledComponent {
+class StorylinePlaceholderMap extends Component {
   final StorylineMapData mapData;
   
-  StorylinePlaceholderMap({required this.mapData})
-      : super(
-          // Create as basic TiledComponent for compatibility
-          size: Vector2(800, 600),
-        );
+  StorylinePlaceholderMap({required this.mapData});
   
   @override
   Future<void> onLoad() async {
